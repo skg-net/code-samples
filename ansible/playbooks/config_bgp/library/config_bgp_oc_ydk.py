@@ -69,6 +69,7 @@ from ydk.path import Repository
 from ydk.models.openconfig import openconfig_network_instance as oc_ni
 from ydk.services import CRUDService
 from ydk.models.openconfig import openconfig_policy_types as oc_policy_types
+from ydk.models.openconfig import openconfig_bgp as oc_bgp
 from ydk.models.openconfig import openconfig_bgp_types as oc_bgp_types
 import sys
 
@@ -113,9 +114,42 @@ def config_bgp_ipv4(yang_repo="",
 
      # Fill out your BGP object properly using the Openconfig Yang Model
      # You will need to bring up the IBGP neighbor between rtr1 and rtr4
+    
+     protocol.bgp.global_.config.router_id = bgp["router_id"]
+     peer_group = protocol.bgp.peer_groups.PeerGroup()
+     peer_group.peer_group_name = bgp["peer-group-name"]
+     peer_group.config.peer_group_name = bgp["peer-group-name"]
+     peer_group.config.peer_as = int(bgp["peer-as"])
+     peer_group.transport.config.local_address = bgp["peer-group-local-address"]
+
+     pg_ipv4_afsf = peer_group.afi_safis.AfiSafi()
+     pg_ipv4_afsf.afi_safi_name = oc_bgp_types.IPV4UNICAST()
+     pg_ipv4_afsf.config.afi_safi_name = oc_bgp_types.IPV4UNICAST()
+     pg_ipv4_afsf.config.enabled = True
+     peer_group.afi_safis.afi_safi.append(pg_ipv4_afsf)
+     protocol.bgp.peer_groups.peer_group.append(peer_group)
+
+     #pdb.set_trace()    
+     neighbor = protocol.bgp.neighbors.Neighbor()
+     neighbor.neighbor_address = bgp["neighbor"] 
+     neighbor.config.peer_group = bgp["peer-group-name"]
+     #neighbor.config.enabled = True
+     ng_ipv4_afsf = neighbor.afi_safis.AfiSafi()
+     ng_ipv4_afsf.afi_safi_name = oc_bgp_types.IPV4UNICAST()
+     ng_ipv4_afsf.config.afi_safi_name = oc_bgp_types.IPV4UNICAST()
+     ng_ipv4_afsf.config.enabled = True
+     neighbor.afi_safis.afi_safi.append(ng_ipv4_afsf)
+     protocol.bgp.neighbors.neighbor.append(neighbor)
+
+     ipv4_afsf = protocol.bgp.global_.afi_safis.AfiSafi()
+     ipv4_afsf.afi_safi_name = oc_bgp_types.IPV4UNICAST()
+     ipv4_afsf.config.afi_safi_name = oc_bgp_types.IPV4UNICAST()
+     ipv4_afsf.config.enabled = True
+     protocol.bgp.global_.afi_safis.afi_safi.append(ipv4_afsf)
+
+   # neighbor = 
 
      ni.protocols.protocol.append(protocol)
-
 
      if crud_op == "add":
          response = crud.create(provider, ni)
