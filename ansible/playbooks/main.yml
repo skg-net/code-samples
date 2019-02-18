@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  gather_facts: no
+  become: yes
+- name: include bgp play 
+  import_playbook: config_bgp/config_oc_bgp_ydk.yml
+
+- name: include bgp play 
+  import_playbook: telemetry/telemetry.yml
+
+- name: include bgp play 
+  import_playbook: reachability_check/ip_dest_reachable_ydk.yml

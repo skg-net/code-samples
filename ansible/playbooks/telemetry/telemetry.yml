@@ -1,0 +1,24 @@
+---
+- hosts: localhost
+  gather_facts: no
+  become: yes
+
+  vars:
+    connect_vars:
+       host: "{{ ansible_host }}"
+       username: "{{ ansible_user }}"
+       password: "{{ ansible_ssh_pass }}"
+
+  tasks:
+
+  - name: install docker pip
+    pip:
+      name: docker
+  - name: Bringup the telemetry container
+    docker_container:
+      name: "telemtry"
+      image: "akshshar/nanog75-telemetry"
+      state: "started"
+      volumes:
+      - "/home/tesuto/code-samples/telemetry/telemetry.py:/root/telemetry.py"
+      command:  "/bin/bash -c 'python3 /root/telemetry.py'"  
